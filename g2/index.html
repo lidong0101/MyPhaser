@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>phaser</title>
+	<script src="js/phaser.min.js"></script>
+	<script src="js/g2.js"></script>
+</head>
+<body>
+	<div id="container"></div>
+	<script type="text/javascript">
+		// 实例化phaser对象
+		var game = new Phaser.Game(288,505,Phaser.AUTO,'container');
+		//把定义好的场景添加到游戏中
+		game.state.add('boot', boot);
+		game.state.add('loader', loader);
+		game.state.add('play', play);
+		//调用boot场景来启动游戏
+		game.state.start('boot');
+	</script>
+</body>
+</html>
