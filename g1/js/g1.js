@@ -1,6 +1,3 @@
-var SCORE = 0;
-
-
 var boot = function(game){
     this.preload = function(){
     	//加载进度条图片资源
@@ -32,6 +29,7 @@ var loader = function(game){
 	    game.load.image('play_tip','assets/instructions.png'); //玩法提示图片
 	    game.load.image('game_over','assets/gameover.png'); //gameover图片
 	    game.load.image('score_board','assets/scoreboard.png'); //得分板
+	    game.load.spritesheet('medals','assets/medals.png',44,46);
 	    // 加载进度
 	    game.load.onFileComplete.add(function(progress){
 	    	console.log(progress);
@@ -51,7 +49,7 @@ var menu = function(game){
         var bird = titleGroup.create(190, 10, 'bird'); //添加bird到组里
         bird.animations.add('fly'); //添加动画
         bird.animations.play('fly',12,true); //播放动画
-        titleGroup.x = 35;
+        titleGroup.x = game.width/2 - titleGroup.width/2;
         titleGroup.y = 100;
         game.add.tween(titleGroup).to({ y:120 },1000,null,true,0,Number.MAX_VALUE,true); //标题的补间动画
         var btn = game.add.button(game.width/2,game.height/2,'btn',function(){//按钮
@@ -79,12 +77,11 @@ var play = function(game){
         this.soundScore = game.add.sound('score_sound'); //获得分数的声音
         this.soundHitPipe = game.add.sound('hit_pipe_sound'); //撞击管道的声音
         this.soundHitGround = game.add.sound('hit_ground_sound'); //撞击地面的声音
-        this.scoreText = game.add.text(0,0,'得分：0',{fontSize:'12px',fill:'#fff'});
+        this.scoreText = game.add.bitmapText(10, 10, 'flappy_font', 'SCORE  0', 24);
         this.readyText = game.add.image(game.width/2, 40, 'ready_text'); //get ready 文字
         this.playTip = game.add.image(game.width/2,300,'play_tip'); //提示点击屏幕的图片
         this.readyText.anchor.setTo(0.5, 0);
         this.playTip.anchor.setTo(0.5, 0);
-
         this.hasStarted = false; //游戏是否已开始
         game.time.events.loop(900, this.generatePipes, this); //利用时钟事件来循环产生管道
         game.time.events.stop(false); //先不要启动时钟
@@ -156,7 +153,7 @@ var play = function(game){
 	    if(!pipe.hasScored && pipe.y<=0 && pipe.x<=this.bird.x-17-54){
 	        pipe.hasScored = true; //标识为已经得过分
 	        this.score += 1000;
-	        this.scoreText.text = '得分：'+this.score; //更新分数的显示
+	        this.scoreText.text = 'SCORE  '+this.score; //更新分数的显示
 	        this.soundScore.play(); //得分的音效
 	        return true; 
 	    }
@@ -189,5 +186,37 @@ var play = function(game){
 var over = function(game){
 	this.create = function(){
 		console.log(SCORE);
+		game.add.tileSprite(0, 0, game.width,game.height, 'background').autoScroll(-10,0); //背景图
+        game.add.tileSprite(0, game.height-112, game.width, 112, 'ground').autoScroll(-100,0); //地板
+        // 结束标题
+        var titleGroup = game.add.group(); //创建存放标题的组
+        titleGroup.create(0, 0, 'game_over'); //标题
+        var bird = titleGroup.create(190, 10, 'bird'); //添加bird到组里
+        bird.animations.add('fly'); //添加动画
+        bird.animations.play('fly',12,true); //播放动画
+        titleGroup.x = 35;
+        titleGroup.y = game.height/10*1;
+        game.add.tween(titleGroup).to({ y:game.height/10*1+20 },1000,null,true,0,Number.MAX_VALUE,true); //标题的补间动画
+        // 当前得分
+        var boardGroup = game.add.group();
+		boardGroup.create(0, 0, 'score_board');
+		if (SCORE>=10000) {
+			boardGroup.create(26, 43, 'medals', 1);
+		}else{
+			boardGroup.create(26, 43, 'medals', 0);
+		}
+		var score = game.add.bitmapText(208, 58, 'flappy_font', SCORE+'', 20);
+		score.anchor.setTo(1,1);
+		var best = game.add.bitmapText(208, 104, 'flappy_font', BEST+'', 20);
+		best.anchor.setTo(1,1);
+		boardGroup.addChild(score);
+		boardGroup.addChild(best);
+		boardGroup.x = game.width/2 - boardGroup.width/2;
+		boardGroup.y = game.height/10*3;
+        // 重新开始
+        var btn = game.add.button(game.width/2,game.height/10*7,'btn',function(){//按钮
+            game.state.start('play');//点击按钮时跳转到play场景
+        });
+        btn.anchor.setTo(0.5,0.5);//设置按钮的中心点
 	}
 }
